@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ReadDir, OpenInEditor } from '../../wailsjs/go/main/App';
 import { backend } from '../../wailsjs/go/models';
+import { FolderIcon, FileIcon } from './Icons';
 
 interface FileTreeProps {
   rootPath: string;
@@ -127,9 +128,11 @@ const FileTreeNode: React.FC<FileTreeNodeProps> = ({ item, depth, defaultEditor 
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-          <span style={{ fontSize: '1rem', width: '16px', display: 'inline-block' }}>
-            {item.isDir ? (isExpanded ? '📂' : '📁') : '📄'}
-          </span>
+          {item.isDir ? (
+            <FolderIcon size={16} style={{ color: 'var(--accent-blue)', flexShrink: 0 }} />
+          ) : (
+            <FileIcon size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+          )}
           <span
             style={{
               fontSize: '0.9rem',
