@@ -106,7 +106,7 @@ export const ProjectCanvas: React.FC<ProjectCanvasProps> = ({ project, onBack })
   };
 
   // Combine auto-cook tasks and package scripts
-  const detectedScripts = { ...project.scripts };
+  const detectedScripts = { ...(project.scripts || {}) };
   const autoCookTasks = project.autoCookData?.tasks || [];
 
   return (

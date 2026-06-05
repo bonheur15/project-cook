@@ -116,7 +116,7 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
 
     const matchesLang =
       selectedLanguageFilter === 'All' ||
-      proj.langStack.some((lang) => lang.toLowerCase() === selectedLanguageFilter.toLowerCase());
+      (proj.langStack || []).some((lang) => lang.toLowerCase() === selectedLanguageFilter.toLowerCase());
 
     return matchesSearch && matchesLang;
   });
@@ -124,7 +124,7 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
   // Extract unique languages for filter tabs
   const allLanguages = ['All'];
   projects.forEach((p) => {
-    p.langStack.forEach((l) => {
+    (p.langStack || []).forEach((l) => {
       if (!allLanguages.includes(l)) allLanguages.push(l);
     });
   });
@@ -379,7 +379,7 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
 
                     {/* Stack / Framework tags */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
-                      {proj.langStack.map((lang) => (
+                      {(proj.langStack || []).map((lang) => (
                         <span
                           key={lang}
                           style={{
@@ -394,7 +394,7 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
                           {lang}
                         </span>
                       ))}
-                      {proj.frameworks.map((fw) => (
+                      {(proj.frameworks || []).map((fw) => (
                         <span
                           key={fw}
                           style={{
