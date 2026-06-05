@@ -100,10 +100,11 @@ func (s *WorkspaceScanner) Scan(workspacePath string) ([]Project, error) {
 
 func (s *WorkspaceScanner) detectProject(path string) (Project, bool) {
 	proj := Project{
-		Name:      filepath.Base(path),
-		Path:      path,
-		LangStack: []string{},
-		Scripts:   make(map[string]string),
+		Name:       filepath.Base(path),
+		Path:       path,
+		LangStack:  []string{},
+		Frameworks: []string{},
+		Scripts:    make(map[string]string),
 	}
 
 	// 1. Detect Stack files
