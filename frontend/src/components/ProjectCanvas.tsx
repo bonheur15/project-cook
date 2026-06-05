@@ -4,6 +4,7 @@ import { TerminalView } from './TerminalView';
 import { SafeModeModal } from './SafeModeModal';
 import { GetConfig, OpenInEditor, StartProcess } from '../../wailsjs/go/main/App';
 import { backend } from '../../wailsjs/go/models';
+import { CodeIcon, GitBranchIcon, ArrowLeftIcon, PlayIcon, CloseIcon } from './Icons';
 
 interface ProjectCanvasProps {
   project: backend.Project;
@@ -123,15 +124,15 @@ export const ProjectCanvas: React.FC<ProjectCanvasProps> = ({ project, onBack })
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', overflow: 'hidden' }}>
-          <button className="btn btn-secondary" onClick={onBack} style={{ padding: '6px 12px' }}>
-            ← Back
+          <button className="btn btn-secondary" onClick={onBack} style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <ArrowLeftIcon size={14} /> Back
           </button>
           <div style={{ textAlign: 'left', overflow: 'hidden' }}>
             <h2 style={{ fontSize: '1.2rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🍳 {project.name}
+              <CodeIcon size={18} style={{ color: 'var(--accent-blue)' }} /> {project.name}
               {project.gitBranch && (
-                <span style={{ fontSize: '0.8rem', fontWeight: 500, padding: '2px 8px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.12)', color: 'var(--accent-blue)' }}>
-                  🌿 {project.gitBranch}
+                <span style={{ fontSize: '0.8rem', fontWeight: 500, padding: '2px 8px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.12)', color: 'var(--accent-blue)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <GitBranchIcon size={12} /> {project.gitBranch}
                 </span>
               )}
             </h2>
@@ -164,8 +165,8 @@ export const ProjectCanvas: React.FC<ProjectCanvasProps> = ({ project, onBack })
           
           {/* Section: Project Cookbook Commands */}
           <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '20px', textAlign: 'left' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-              ⚡ Project Commands
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '16px', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <CodeIcon size={16} style={{ color: 'var(--accent-blue)' }} /> Project Commands
             </h3>
 
             {/* Render auto-cook.json tasks if any */}
@@ -180,9 +181,9 @@ export const ProjectCanvas: React.FC<ProjectCanvasProps> = ({ project, onBack })
                       key={task.name}
                       className="btn btn-primary"
                       onClick={() => executeCommand(task.name, task.command)}
-                      style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+                      style={{ fontSize: '0.8rem', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
                     >
-                      🚀 {task.name}
+                      <PlayIcon size={12} /> {task.name}
                     </button>
                   ))}
                 </div>
@@ -207,10 +208,10 @@ export const ProjectCanvas: React.FC<ProjectCanvasProps> = ({ project, onBack })
                       key={name}
                       className="btn btn-secondary"
                       onClick={() => executeCommand(name, cmd)}
-                      style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+                      style={{ fontSize: '0.8rem', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
                       title={cmd}
                     >
-                      🏃 {name}
+                      <PlayIcon size={12} /> {name}
                     </button>
                   ))}
                 </div>
@@ -263,13 +264,14 @@ export const ProjectCanvas: React.FC<ProjectCanvasProps> = ({ project, onBack })
                           border: 'none',
                           color: 'var(--text-muted)',
                           cursor: 'pointer',
-                          fontSize: '1rem',
+                          display: 'flex',
+                          alignItems: 'center',
                           marginLeft: '4px',
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent-rose)')}
                         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
                       >
-                        ×
+                        <CloseIcon size={12} />
                       </button>
                     )}
                   </div>
