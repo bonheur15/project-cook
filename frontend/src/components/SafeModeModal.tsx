@@ -1,4 +1,5 @@
 import React from 'react';
+import { WarningIcon, ShieldIcon } from './Icons';
 
 interface SafeModeModalProps {
   isOpen: boolean;
@@ -40,12 +41,12 @@ export const SafeModeModal: React.FC<SafeModeModalProps> = ({
           <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {danger ? (
               <>
-                <span style={{ color: 'var(--accent-rose)', fontSize: '1.4rem' }}>⚠️</span>
+                <WarningIcon size={20} style={{ color: 'var(--accent-rose)' }} />
                 Dangerous Command Warning
               </>
             ) : (
               <>
-                <span style={{ color: 'var(--accent-amber)', fontSize: '1.4rem' }}>🛡️</span>
+                <ShieldIcon size={20} style={{ color: 'var(--accent-amber)' }} />
                 Review Command Before Run
               </>
             )}
