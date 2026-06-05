@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GetConfig, SaveConfig, ScanWorkspace, OpenInEditor } from '../../wailsjs/go/main/App';
 import { backend } from '../../wailsjs/go/models';
+import { CodeIcon, SearchIcon, GitBranchIcon, CloseIcon } from './Icons';
 
 interface WorkspaceDashboardProps {
   onOpenProject: (project: backend.Project) => void;
@@ -141,11 +142,11 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
           textAlign: 'left',
         }}
       >
-        <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--border-color)' }}>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: 700, background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-teal))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            🍳 Project Cooker
+        <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-teal))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <CodeIcon size={20} style={{ color: 'var(--accent-blue)' }} /> Project Cooker
           </h2>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Developer workspace cockpit</p>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Developer workspace cockpit</p>
         </div>
 
         {/* Workspace List */}
@@ -192,10 +193,10 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
                   <button
                     className="btn-text"
                     onClick={(e) => handleRemoveWorkspace(path, e)}
-                    style={{ padding: '2px 6px', fontSize: '0.9rem', color: 'var(--text-muted)' }}
+                    style={{ padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                     title="Remove workspace"
                   >
-                    ×
+                    <CloseIcon size={12} />
                   </button>
                 </div>
               );
@@ -242,7 +243,7 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
           }}
         >
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '6px 12px' }}>
-            <span style={{ marginRight: '8px', color: 'var(--text-muted)' }}>🔍</span>
+            <SearchIcon size={16} style={{ marginRight: '8px', color: 'var(--text-muted)' }} />
             <input
               type="text"
               placeholder="Search projects by name, branch, stack..."
@@ -294,8 +295,8 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
 
           {loading && (
             <div style={{ textAlign: 'center', padding: '64px', color: 'var(--text-muted)' }}>
-              <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🍳</div>
-              Scanning workspace directories...
+              <CodeIcon size={32} style={{ marginBottom: '12px', color: 'var(--text-muted)' }} className="animate-fade" />
+              <div>Scanning workspace directories...</div>
             </div>
           )}
 
@@ -359,10 +360,14 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
                             border: '1px solid',
                             borderColor: proj.gitChanges > 0 ? 'rgba(251, 191, 36, 0.2)' : 'rgba(52, 211, 153, 0.2)',
                             whiteSpace: 'nowrap',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
                           }}
                           title={`${proj.gitChanges} uncommitted changes`}
                         >
-                          🌿 {proj.gitBranch} {proj.gitChanges > 0 && `• ${proj.gitChanges}`}
+                          <GitBranchIcon size={12} />
+                          <span>{proj.gitBranch} {proj.gitChanges > 0 && `• ${proj.gitChanges}`}</span>
                         </div>
                       )}
                     </div>
