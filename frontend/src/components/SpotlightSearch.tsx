@@ -10,6 +10,7 @@ interface SpotlightSearchProps {
   projects: backend.Project[];
   onOpenProject: (project: backend.Project) => void;
   defaultEditor: string;
+  initialQuery?: string;
 }
 
 type SearchMode = 'projects' | 'files' | 'content';
@@ -21,6 +22,7 @@ export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({
   projects,
   onOpenProject,
   defaultEditor,
+  initialQuery = '',
 }) => {
   const [query, setQuery] = useState<string>('');
   const [mode, setMode] = useState<SearchMode>('projects');
@@ -34,20 +36,25 @@ export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({
   // Reset search when opening
   useEffect(() => {
     if (isOpen) {
-      setQuery('');
+      const initQ = initialQuery || '';
+      setQuery(initQ);
       setResults([]);
       setSelectedIndex(0);
       setMode('projects');
       
       // Auto-focus search input
       setTimeout(() => {
-        inputRef.current?.focus();
+        if (inputRef.current) {
+          inputRef.current.focus();
+          // Move cursor to end of text
+          inputRef.current.setSelectionRange(initQ.length, initQ.length);
+        }
       }, 50);
 
-      // Perform initial empty projects search
-      handleSearch('', 'projects');
+      // Perform initial search
+      handleSearch(initQ, 'projects');
     }
-  }, [isOpen]);
+  }, [isOpen, initialQuery]);
 
   // Handle keydown events on window
   useEffect(() => {

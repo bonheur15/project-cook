@@ -15,21 +15,42 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
   const [newWorkspaceInput, setNewWorkspaceInput] = useState<string>('');
   const [projects, setProjects] = useState<backend.Project[]>([]);
   const [spotlightOpen, setSpotlightOpen] = useState<boolean>(false);
-  const [selectedLanguageFilter, setSelectedLanguageFilter] = useState<string>('All');
+  const [initialSearchQuery, setInitialSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Global keyboard listener for Spotlight search (Ctrl+K or Ctrl+P)
+  // Global keyboard listener for Spotlight search (typing printable chars, Ctrl+K or Ctrl+P)
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (spotlightOpen) return;
+
+      const activeEl = document.activeElement;
+      const isInputFocused =
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          activeEl.getAttribute('contenteditable') === 'true');
+
+      if (isInputFocused) return;
+
+      // Handle Ctrl+K / Ctrl+P
       if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'p')) {
         e.preventDefault();
+        setInitialSearchQuery('');
+        setSpotlightOpen(true);
+        return;
+      }
+
+      // Handle printable characters when typing starts
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        setInitialSearchQuery(e.key);
         setSpotlightOpen(true);
       }
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, []);
+  }, [spotlightOpen]);
 
   // Load config on mount
   useEffect(() => {
@@ -124,21 +145,7 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
   };
 
   // Filter projects based on stack type
-  const filteredProjects = projects.filter((proj) => {
-    const matchesLang =
-      selectedLanguageFilter === 'All' ||
-      (proj.langStack || []).some((lang) => lang.toLowerCase() === selectedLanguageFilter.toLowerCase());
-
-    return matchesLang;
-  });
-
-  // Extract unique languages for filter tabs
-  const allLanguages = ['All'];
-  projects.forEach((p) => {
-    (p.langStack || []).forEach((l) => {
-      if (!allLanguages.includes(l)) allLanguages.push(l);
-    });
-  });
+  const filteredProjects = projects;
 
   return (
     <div className="animate-fade" style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
@@ -242,82 +249,6 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
 
       {/* Main Grid Panel */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Top Header Filter Bar */}
-        <div
-          style={{
-            padding: '20px 32px',
-            borderBottom: '1px solid var(--border-color)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '16px',
-          }}
-        >
-          <button
-            onClick={() => setSpotlightOpen(true)}
-            style={{
-              flex: 1,
-              maxWidth: '320px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px',
-              padding: '6px 12px',
-              cursor: 'pointer',
-              color: 'var(--text-muted)',
-              fontSize: '0.9rem',
-              outline: 'none',
-              transition: 'border-color var(--transition-fast)',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'}
-            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <SearchIcon size={14} />
-              <span>Search workspace...</span>
-            </div>
-            <kbd
-              style={{
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                borderRadius: '4px',
-                padding: '1px 5px',
-                fontSize: '0.7rem',
-                color: 'var(--text-muted)',
-                fontFamily: 'sans-serif',
-              }}
-            >
-              Ctrl+K
-            </kbd>
-          </button>
-
-          {/* Language filters */}
-          <div style={{ display: 'flex', gap: '6px' }}>
-            {allLanguages.map((lang) => (
-              <button
-                key={lang}
-                onClick={() => setSelectedLanguageFilter(lang)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '16px',
-                  fontSize: '0.8rem',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  border: '1px solid',
-                  borderColor: selectedLanguageFilter === lang ? 'var(--accent-blue)' : 'var(--border-color)',
-                  background: selectedLanguageFilter === lang ? 'rgba(56, 189, 248, 0.15)' : 'var(--bg-secondary)',
-                  color: selectedLanguageFilter === lang ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                  transition: 'all var(--transition-fast)',
-                }}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Project Card Grid */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
           {error && (
@@ -471,11 +402,15 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
       {/* Spotlight Search Overlay */}
       <SpotlightSearch
         isOpen={spotlightOpen}
-        onClose={() => setSpotlightOpen(false)}
+        onClose={() => {
+          setSpotlightOpen(false);
+          setInitialSearchQuery('');
+        }}
         activeWorkspace={activeWorkspace}
         projects={projects}
         onOpenProject={onOpenProject}
         defaultEditor={config?.defaultEditor || 'zed'}
+        initialQuery={initialSearchQuery}
       />
     </div>
   );
