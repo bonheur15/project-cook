@@ -12,11 +12,11 @@ help:
 
 # Start development server with live reloading
 dev:
-	GTK_CSD=0 wails dev
+	GTK_CSD=0 GDK_BACKEND=x11 wails dev
 
 # Build the production executable
 build:
-	GTK_CSD=0 wails build
+	GTK_CSD=0 GDK_BACKEND=x11 wails build
 
 # Clean up build artifacts
 clean:

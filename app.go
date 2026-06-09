@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"project-cook/backend"
+	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -26,7 +27,31 @@ func NewApp() *App {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	runtime.WindowCenter(ctx)
+	
+	// Dynamically size window to 85% of primary screen size
+	screens, err := runtime.ScreenGetAll(ctx)
+	if err == nil && len(screens) > 0 {
+		var primaryScreen runtime.Screen
+		for _, s := range screens {
+			if s.IsPrimary {
+				primaryScreen = s
+				break
+			}
+		}
+		if primaryScreen.Width == 0 {
+			primaryScreen = screens[0]
+		}
+		
+		// Set width/height to 97% of the monitor dimensions
+		w := int(float64(primaryScreen.Width) * 0.97)
+		h := int(float64(primaryScreen.Height) * 0.97)
+		runtime.WindowSetSize(ctx, w, h)
+	}
+	
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		runtime.WindowCenter(ctx)
+	}()
 }
 
 func (a *App) GetConfig() (*backend.Config, error) {
