@@ -6,6 +6,10 @@ export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
 }
 
+export function GetConfigPath() {
+  return window['go']['main']['App']['GetConfigPath']();
+}
+
 export function GetProcessLogs(arg1, arg2) {
   return window['go']['main']['App']['GetProcessLogs'](arg1, arg2);
 }
@@ -20,6 +24,10 @@ export function KillProcess(arg1, arg2) {
 
 export function OpenInEditor(arg1, arg2) {
   return window['go']['main']['App']['OpenInEditor'](arg1, arg2);
+}
+
+export function ReadConfigFile() {
+  return window['go']['main']['App']['ReadConfigFile']();
 }
 
 export function ReadDir(arg1) {
@@ -44,4 +52,8 @@ export function SelectDirectory() {
 
 export function StartProcess(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['StartProcess'](arg1, arg2, arg3, arg4);
+}
+
+export function WriteConfigFile(arg1) {
+  return window['go']['main']['App']['WriteConfigFile'](arg1);
 }

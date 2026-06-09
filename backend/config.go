@@ -34,6 +34,10 @@ func NewConfigManager() *ConfigManager {
 	}
 }
 
+func (m *ConfigManager) GetFilePath() string {
+	return m.filePath
+}
+
 func (m *ConfigManager) GetDefaultConfig() *Config {
 	return &Config{
 		Workspaces:               []string{},

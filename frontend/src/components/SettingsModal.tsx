@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { SelectDirectory, SaveConfig } from '../../wailsjs/go/main/App';
+import { SelectDirectory, SaveConfig, GetConfigPath, ReadConfigFile, WriteConfigFile, OpenInEditor } from '../../wailsjs/go/main/App';
 import { backend } from '../../wailsjs/go/models';
 import { CloseIcon, SettingsIcon, FolderIcon, TrashIcon, CodeIcon } from './Icons';
+import { CustomSelect } from './CustomSelect';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -12,7 +13,7 @@ interface SettingsModalProps {
   setActiveWorkspace: (path: string) => void;
 }
 
-type TabType = 'general' | 'appearance' | 'workspaces';
+type TabType = 'general' | 'appearance' | 'workspaces' | 'developer';
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
@@ -39,6 +40,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [newFolderPath, setNewFolderPath] = useState<string>('');
   const [newWorkspaceName, setNewWorkspaceName] = useState<string>('');
 
+  // Developer tab state
+  const [configFilePath, setConfigFilePath] = useState<string>('');
+  const [rawConfigText, setRawConfigText] = useState<string>('');
+  const [copied, setCopied] = useState<boolean>(false);
+
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +66,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       setNewFolderPath('');
       setNewWorkspaceName('');
       setError(null);
+
+      // Load Developer tab settings config file path and content
+      const loadDevConfig = async () => {
+        try {
+          const path = await GetConfigPath();
+          setConfigFilePath(path);
+          const raw = await ReadConfigFile();
+          setRawConfigText(raw);
+        } catch (err) {
+          console.error('Failed to load developer config file info', err);
+        }
+      };
+      loadDevConfig();
     }
   }, [isOpen, config]);
 
@@ -117,6 +136,39 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       onClose();
     } catch (err: any) {
       setError(err?.message || 'Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCopyPath = () => {
+    navigator.clipboard.writeText(configFilePath);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleOpenConfigInEditor = async () => {
+    try {
+      setError(null);
+      await OpenInEditor(defaultEditor, configFilePath);
+      onClose();
+    } catch (err: any) {
+      setError(err?.message || 'Failed to open config in editor');
+    }
+  };
+
+  const handleSaveRawConfig = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      // Validate JSON structure
+      JSON.parse(rawConfigText);
+
+      await WriteConfigFile(rawConfigText);
+      onConfigChange();
+      onClose();
+    } catch (err: any) {
+      setError(err?.message || 'Invalid JSON format. Please verify configuration format.');
     } finally {
       setSaving(false);
     }
@@ -332,6 +384,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             >
               Workspaces ({config.workspaces.length})
             </button>
+            <button
+              onClick={() => { setActiveTab('developer'); setAddFlowActive(false); }}
+              style={{
+                textAlign: 'left',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: 'none',
+                background: activeTab === 'developer' ? 'rgba(255, 255, 255, 0.04)' : 'transparent',
+                color: activeTab === 'developer' ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                fontWeight: activeTab === 'developer' ? 600 : 400,
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                transition: 'all var(--transition-fast)',
+              }}
+            >
+              Developer Options
+            </button>
           </div>
 
           {/* Modal Sidebar Tab Content */}
@@ -344,23 +413,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                     Default Code Editor
                   </label>
-                  <select
+                  <CustomSelect
                     value={defaultEditor}
-                    onChange={(e) => setDefaultEditor(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid var(--border-color)',
-                      background: 'var(--bg-primary)',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.9rem',
-                      outline: 'none',
-                    }}
-                  >
-                    <option value="zed">Zed Editor</option>
-                    <option value="code">VS Code</option>
-                  </select>
+                    onChange={setDefaultEditor}
+                    options={[
+                      { value: 'zed', label: 'Zed Editor' },
+                      { value: 'code', label: 'VS Code' },
+                    ]}
+                  />
                 </div>
 
                 {/* Default Terminal Shell Selection */}
@@ -368,25 +428,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                     Default Shell
                   </label>
-                  <select
+                  <CustomSelect
                     value={defaultShell}
-                    onChange={(e) => setDefaultShell(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid var(--border-color)',
-                      background: 'var(--bg-primary)',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.9rem',
-                      outline: 'none',
-                    }}
-                  >
-                    <option value="bash">bash</option>
-                    <option value="zsh">zsh</option>
-                    <option value="fish">fish</option>
-                    <option value="sh">sh</option>
-                  </select>
+                    onChange={setDefaultShell}
+                    options={[
+                      { value: 'bash', label: 'bash' },
+                      { value: 'zsh', label: 'zsh' },
+                      { value: 'fish', label: 'fish' },
+                      { value: 'sh', label: 'sh' },
+                    ]}
+                  />
                 </div>
 
                 {/* Safe Mode Checkbox */}
@@ -712,11 +763,76 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 )}
               </div>
             )}
+
+            {/* DEVELOPER TAB */}
+            {activeTab === 'developer' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                    Configuration File Location
+                  </label>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div style={{ flex: 1, background: 'var(--bg-primary)', border: '1px solid var(--border-color)', padding: '8px 12px', borderRadius: '6px', fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {configFilePath}
+                    </div>
+                    <button
+                      onClick={handleCopyPath}
+                      className="btn btn-secondary"
+                      style={{ padding: '8px 12px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                    >
+                      {copied ? 'Copied!' : 'Copy Path'}
+                    </button>
+                    <button
+                      onClick={handleOpenConfigInEditor}
+                      className="btn btn-secondary"
+                      style={{ padding: '8px 12px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                    >
+                      Open in {defaultEditor === 'zed' ? 'Zed' : 'VS Code'}
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                    Raw config.json
+                  </label>
+                  <textarea
+                    value={rawConfigText}
+                    onChange={(e) => setRawConfigText(e.target.value)}
+                    style={{
+                      flex: 1,
+                      width: '100%',
+                      minHeight: '180px',
+                      background: 'var(--bg-primary)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '6px',
+                      padding: '12px',
+                      color: 'var(--text-primary)',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.8rem',
+                      outline: 'none',
+                      resize: 'none',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                  <button
+                    onClick={handleSaveRawConfig}
+                    className="btn btn-primary"
+                    style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                    disabled={saving}
+                  >
+                    {saving ? 'Saving...' : 'Save Configuration JSON'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Footer */}
-        {activeTab !== 'workspaces' && (
+        {(activeTab === 'general' || activeTab === 'appearance') && (
           <div
             className="modal-footer"
             style={{

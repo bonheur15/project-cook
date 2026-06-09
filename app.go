@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"project-cook/backend"
 	"time"
 
@@ -107,5 +108,23 @@ func (a *App) SelectDirectory() (string, error) {
 
 func (a *App) SearchWorkspace(workspacePath string, query string, searchType string) ([]backend.SearchResult, error) {
 	return a.searchEngine.Search(workspacePath, query, searchType)
+}
+
+func (a *App) GetConfigPath() string {
+	return a.configManager.GetFilePath()
+}
+
+func (a *App) ReadConfigFile() (string, error) {
+	path := a.configManager.GetFilePath()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+func (a *App) WriteConfigFile(content string) error {
+	path := a.configManager.GetFilePath()
+	return os.WriteFile(path, []byte(content), 0644)
 }
 

@@ -4,6 +4,8 @@ import {backend} from '../models';
 
 export function GetConfig():Promise<backend.Config>;
 
+export function GetConfigPath():Promise<string>;
+
 export function GetProcessLogs(arg1:string,arg2:string):Promise<Array<string>>;
 
 export function GetProcessRunning(arg1:string,arg2:string):Promise<boolean>;
@@ -11,6 +13,8 @@ export function GetProcessRunning(arg1:string,arg2:string):Promise<boolean>;
 export function KillProcess(arg1:string,arg2:string):Promise<void>;
 
 export function OpenInEditor(arg1:string,arg2:string):Promise<void>;
+
+export function ReadConfigFile():Promise<string>;
 
 export function ReadDir(arg1:string):Promise<Array<backend.FileItem>>;
 
@@ -23,3 +27,5 @@ export function SearchWorkspace(arg1:string,arg2:string,arg3:string):Promise<Arr
 export function SelectDirectory():Promise<string>;
 
 export function StartProcess(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
+
+export function WriteConfigFile(arg1:string):Promise<void>;
