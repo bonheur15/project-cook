@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"project-cook/backend"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type App struct {
@@ -24,6 +26,7 @@ func NewApp() *App {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	runtime.WindowCenter(ctx)
 }
 
 func (a *App) GetConfig() (*backend.Config, error) {
@@ -68,3 +71,10 @@ func (a *App) OpenInEditor(editor string, path string) error {
 func (a *App) ReadDir(path string) ([]backend.FileItem, error) {
 	return a.launcher.ReadDir(path)
 }
+
+func (a *App) SelectDirectory() (string, error) {
+	return runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "Select Workspace Folder",
+	})
+}
+

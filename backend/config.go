@@ -37,7 +37,7 @@ func NewConfigManager() *ConfigManager {
 func (m *ConfigManager) GetDefaultConfig() *Config {
 	return &Config{
 		Workspaces:               []string{},
-		DefaultEditor:            "code", // code or zed
+		DefaultEditor:            "zed", // zed or code
 		DefaultTerminalShell:     "bash",
 		Theme:                    "dark",
 		SafeMode:                 true,
