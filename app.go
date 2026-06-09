@@ -14,6 +14,7 @@ type App struct {
 	scanner        *backend.WorkspaceScanner
 	processManager *backend.ProcessManager
 	launcher       *backend.Launcher
+	searchEngine   *backend.SearchEngine
 }
 
 func NewApp() *App {
@@ -22,6 +23,7 @@ func NewApp() *App {
 		scanner:        backend.NewWorkspaceScanner(),
 		processManager: backend.NewProcessManager(),
 		launcher:       backend.NewLauncher(),
+		searchEngine:   backend.NewSearchEngine(),
 	}
 }
 
@@ -101,5 +103,9 @@ func (a *App) SelectDirectory() (string, error) {
 	return runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
 		Title: "Select Workspace Folder",
 	})
+}
+
+func (a *App) SearchWorkspace(workspacePath string, query string, searchType string) ([]backend.SearchResult, error) {
+	return a.searchEngine.Search(workspacePath, query, searchType)
 }
 

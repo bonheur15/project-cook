@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GetConfig, SaveConfig, ScanWorkspace, OpenInEditor } from '../../wailsjs/go/main/App';
 import { backend } from '../../wailsjs/go/models';
 import { CodeIcon, SearchIcon, GitBranchIcon, CloseIcon } from './Icons';
+import { SpotlightSearch } from './SpotlightSearch';
 
 interface WorkspaceDashboardProps {
   onOpenProject: (project: backend.Project) => void;
@@ -13,10 +14,22 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
   const [activeWorkspace, setActiveWorkspace] = useState<string>('');
   const [newWorkspaceInput, setNewWorkspaceInput] = useState<string>('');
   const [projects, setProjects] = useState<backend.Project[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [spotlightOpen, setSpotlightOpen] = useState<boolean>(false);
   const [selectedLanguageFilter, setSelectedLanguageFilter] = useState<string>('All');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Global keyboard listener for Spotlight search (Ctrl+K or Ctrl+P)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'p')) {
+        e.preventDefault();
+        setSpotlightOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   // Load config on mount
   useEffect(() => {
@@ -110,18 +123,13 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
     }
   };
 
-  // Filter projects based on search query and stack type
+  // Filter projects based on stack type
   const filteredProjects = projects.filter((proj) => {
-    const matchesSearch =
-      proj.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      proj.path.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (proj.gitBranch && proj.gitBranch.toLowerCase().includes(searchQuery.toLowerCase()));
-
     const matchesLang =
       selectedLanguageFilter === 'All' ||
       (proj.langStack || []).some((lang) => lang.toLowerCase() === selectedLanguageFilter.toLowerCase());
 
-    return matchesSearch && matchesLang;
+    return matchesLang;
   });
 
   // Extract unique languages for filter tabs
@@ -245,23 +253,45 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
             gap: '16px',
           }}
         >
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '6px 12px' }}>
-            <SearchIcon size={16} style={{ marginRight: '8px', color: 'var(--text-muted)' }} />
-            <input
-              type="text"
-              placeholder="Search projects by name, branch, stack..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+          <button
+            onClick={() => setSpotlightOpen(true)}
+            style={{
+              flex: 1,
+              maxWidth: '320px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              padding: '6px 12px',
+              cursor: 'pointer',
+              color: 'var(--text-muted)',
+              fontSize: '0.9rem',
+              outline: 'none',
+              transition: 'border-color var(--transition-fast)',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <SearchIcon size={14} />
+              <span>Search workspace...</span>
+            </div>
+            <kbd
               style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-primary)',
-                width: '100%',
-                fontSize: '0.9rem',
-                outline: 'none',
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '4px',
+                padding: '1px 5px',
+                fontSize: '0.7rem',
+                color: 'var(--text-muted)',
+                fontFamily: 'sans-serif',
               }}
-            />
-          </div>
+            >
+              Ctrl+K
+            </kbd>
+          </button>
 
           {/* Language filters */}
           <div style={{ display: 'flex', gap: '6px' }}>
@@ -438,6 +468,15 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
           )}
         </div>
       </div>
+      {/* Spotlight Search Overlay */}
+      <SpotlightSearch
+        isOpen={spotlightOpen}
+        onClose={() => setSpotlightOpen(false)}
+        activeWorkspace={activeWorkspace}
+        projects={projects}
+        onOpenProject={onOpenProject}
+        defaultEditor={config?.defaultEditor || 'zed'}
+      />
     </div>
   );
 };
