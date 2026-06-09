@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { GetConfig, SaveConfig, ScanWorkspace, OpenInEditor } from '../../wailsjs/go/main/App';
 import { backend } from '../../wailsjs/go/models';
-import { CodeIcon, SearchIcon, GitBranchIcon, CloseIcon } from './Icons';
+import { CodeIcon, SearchIcon, GitBranchIcon, CloseIcon, SettingsIcon } from './Icons';
 import { SpotlightSearch } from './SpotlightSearch';
+import { SettingsModal } from './SettingsModal';
 
 interface WorkspaceDashboardProps {
   onOpenProject: (project: backend.Project) => void;
@@ -12,12 +13,17 @@ interface WorkspaceDashboardProps {
 export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenProject, onConfigChange }) => {
   const [config, setConfig] = useState<backend.Config | null>(null);
   const [activeWorkspace, setActiveWorkspace] = useState<string>('');
-  const [newWorkspaceInput, setNewWorkspaceInput] = useState<string>('');
   const [projects, setProjects] = useState<backend.Project[]>([]);
   const [spotlightOpen, setSpotlightOpen] = useState<boolean>(false);
   const [initialSearchQuery, setInitialSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Floating sidebar autohide and Settings states
+  const [sidebarExpanded, setSidebarExpanded] = useState<boolean>(false);
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
+  const [hoveredWorkspacePath, setHoveredWorkspacePath] = useState<string | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Global keyboard listener for Spotlight search (typing printable chars, Ctrl+K or Ctrl+P)
   useEffect(() => {
@@ -92,29 +98,7 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
     scanActive();
   }, [activeWorkspace]);
 
-  const handleAddWorkspace = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newWorkspaceInput.trim() || !config) return;
 
-    const path = newWorkspaceInput.trim();
-    if (config.workspaces.includes(path)) {
-      alert('Workspace already exists');
-      return;
-    }
-
-    const updatedWorkspaces = [...config.workspaces, path];
-    const updatedConfig = { ...config, workspaces: updatedWorkspaces };
-
-    try {
-      await SaveConfig(updatedConfig);
-      setConfig(updatedConfig);
-      setActiveWorkspace(path);
-      setNewWorkspaceInput('');
-      if (onConfigChange) onConfigChange();
-    } catch (err) {
-      alert(`Error saving workspace: ${err}`);
-    }
-  };
 
   const handleRemoveWorkspace = async (path: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -148,28 +132,45 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
   const filteredProjects = projects;
 
   return (
-    <div className="animate-fade" style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+    <div className="animate-fade" style={{ display: 'flex', height: '100%', overflow: 'hidden', position: 'relative' }}>
+      {/* Invisible hover trigger zone for sidebar */}
+      <div
+        onMouseEnter={() => setSidebarExpanded(true)}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '12px',
+          bottom: 0,
+          zIndex: 99,
+          background: 'transparent',
+        }}
+      />
+
       {/* Workspaces Sidebar */}
       <div
+        onMouseEnter={() => setSidebarExpanded(true)}
+        onMouseLeave={() => setSidebarExpanded(false)}
         style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          bottom: 0,
           width: '260px',
           background: 'var(--bg-secondary)',
           borderRight: '1px solid var(--border-color)',
           display: 'flex',
           flexDirection: 'column',
           textAlign: 'left',
+          zIndex: 100,
+          transform: sidebarExpanded ? 'translateX(0)' : 'translateX(-260px)',
+          transition: 'transform var(--transition-normal)',
+          boxShadow: sidebarExpanded ? '10px 0 30px rgba(0,0,0,0.5)' : 'none',
         }}
       >
-        <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-            <CodeIcon size={20} style={{ color: 'var(--accent-blue)' }} /> ForgeHub
-          </h2>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Developer workspace cockpit</p>
-        </div>
-
         {/* Workspace List */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 12px' }}>
-          <h4 style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.05em', paddingLeft: '8px', marginBottom: '8px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '24px 12px' }}>
+          <h4 style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.05em', paddingLeft: '8px', marginBottom: '12px' }}>
             WORKSPACES
           </h4>
           {config?.workspaces.length === 0 ? (
@@ -195,9 +196,13 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
                   }}
                   onMouseEnter={(e) => {
                     if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setTooltipPos({ x: rect.right + 10, y: rect.top + rect.height / 2 });
+                    setHoveredWorkspacePath(path);
                   }}
                   onMouseLeave={(e) => {
                     if (!isActive) e.currentTarget.style.background = 'transparent';
+                    setHoveredWorkspacePath(null);
                   }}
                 >
                   <div style={{ overflow: 'hidden', marginRight: '8px' }}>
@@ -222,29 +227,26 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
           )}
         </div>
 
-        {/* Add Workspace Form */}
-        <form onSubmit={handleAddWorkspace} style={{ padding: '16px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-tertiary)' }}>
-          <input
-            type="text"
-            placeholder="Add workspace path..."
-            value={newWorkspaceInput}
-            onChange={(e) => setNewWorkspaceInput(e.target.value)}
+        {/* Settings button at the bottom */}
+        <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-tertiary)' }}>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="btn btn-secondary"
             style={{
               width: '100%',
-              padding: '8px 10px',
-              borderRadius: '6px',
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-primary)',
-              color: 'var(--text-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '8px',
               fontSize: '0.85rem',
-              outline: 'none',
-              marginBottom: '8px',
+              fontWeight: 500,
             }}
-          />
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '6px' }}>
-            + Add Workspace
+          >
+            <SettingsIcon size={16} />
+            <span>Settings</span>
           </button>
-        </form>
+        </div>
       </div>
 
       {/* Main Grid Panel */}
@@ -412,6 +414,52 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
         defaultEditor={config?.defaultEditor || 'zed'}
         initialQuery={initialSearchQuery}
       />
+
+      {/* Settings Modal */}
+      {config && (
+        <SettingsModal
+          isOpen={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          config={config}
+          onConfigChange={async () => {
+            if (onConfigChange) onConfigChange();
+            try {
+              const cfg = await GetConfig();
+              setConfig(cfg);
+            } catch (err) {
+              console.error(err);
+            }
+          }}
+          activeWorkspace={activeWorkspace}
+          setActiveWorkspace={setActiveWorkspace}
+        />
+      )}
+
+      {/* Viewport-level Workspace Path Tooltip */}
+      {hoveredWorkspacePath && (
+        <div
+          style={{
+            position: 'fixed',
+            left: `${tooltipPos.x}px`,
+            top: `${tooltipPos.y}px`,
+            transform: 'translateY(-50%)',
+            background: 'var(--bg-tertiary)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '6px',
+            padding: '6px 12px',
+            zIndex: 9999,
+            fontSize: '0.8rem',
+            fontFamily: 'var(--font-sans)',
+            pointerEvents: 'none',
+            boxShadow: 'var(--shadow-lg)',
+            whiteSpace: 'nowrap',
+            animation: 'fadeIn 0.1s ease-out',
+          }}
+        >
+          {hoveredWorkspacePath}
+        </div>
+      )}
     </div>
   );
 };

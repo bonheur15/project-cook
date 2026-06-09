@@ -25,6 +25,30 @@ function App() {
   };
 
   useEffect(() => {
+    // Load custom theme settings on mount
+    const savedAccent = localStorage.getItem('forgehub-accent') || '#81c784';
+    const savedBg = localStorage.getItem('forgehub-bg-theme') || 'zinc';
+    
+    const applyThemeColors = (accentColor: string, bgThemeName: string) => {
+      const bgPresets: Record<string, { primary: string; secondary: string; tertiary: string }> = {
+        zinc: { primary: '#121214', secondary: '#1a1a1e', tertiary: '#232328' },
+        charcoal: { primary: '#18181b', secondary: '#27272a', tertiary: '#3f3f46' },
+        navy: { primary: '#0b0f19', secondary: '#111827', tertiary: '#1f2937' },
+        black: { primary: '#000000', secondary: '#0c0c0e', tertiary: '#18181b' },
+      };
+
+      const colors = bgPresets[bgThemeName] || bgPresets.zinc;
+      const root = document.documentElement;
+      
+      root.style.setProperty('--accent-blue', accentColor);
+      root.style.setProperty('--border-focus', accentColor);
+      root.style.setProperty('--bg-primary', colors.primary);
+      root.style.setProperty('--bg-secondary', colors.secondary);
+      root.style.setProperty('--bg-tertiary', colors.tertiary);
+      root.style.setProperty('--bg-glass', `${colors.secondary}bf`);
+    };
+
+    applyThemeColors(savedAccent, savedBg);
     loadConfig();
   }, []);
 
