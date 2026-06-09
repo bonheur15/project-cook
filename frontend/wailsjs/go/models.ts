@@ -181,6 +181,30 @@ export namespace backend {
 		    return a;
 		}
 	}
+	export class SearchResult {
+	    type: string;
+	    name: string;
+	    path: string;
+	    relPath: string;
+	    lineNumber: number;
+	    lineText: string;
+	    langStack: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new SearchResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.type = source["type"];
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.relPath = source["relPath"];
+	        this.lineNumber = source["lineNumber"];
+	        this.lineText = source["lineText"];
+	        this.langStack = source["langStack"];
+	    }
+	}
 
 }
 
