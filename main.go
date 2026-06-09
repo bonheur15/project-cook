@@ -18,12 +18,12 @@ func main() {
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "project-cook",
-		Width:  1100,
-		Height: 800,
+		Width:  1440,
+		Height: 880,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 11, G: 15, B: 23, A: 255},
+		BackgroundColour: &options.RGBA{R: 18, G: 18, B: 20, A: 255},
 		OnStartup:        app.startup,
 		Frameless:        true,
 		Bind: []interface{}{

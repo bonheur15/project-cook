@@ -34,6 +34,10 @@ export function ScanWorkspace(arg1) {
   return window['go']['main']['App']['ScanWorkspace'](arg1);
 }
 
+export function SelectDirectory() {
+  return window['go']['main']['App']['SelectDirectory']();
+}
+
 export function StartProcess(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['StartProcess'](arg1, arg2, arg3, arg4);
 }

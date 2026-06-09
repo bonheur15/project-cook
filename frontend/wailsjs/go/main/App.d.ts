@@ -18,4 +18,6 @@ export function SaveConfig(arg1:backend.Config):Promise<void>;
 
 export function ScanWorkspace(arg1:string):Promise<Array<backend.Project>>;
 
+export function SelectDirectory():Promise<string>;
+
 export function StartProcess(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
