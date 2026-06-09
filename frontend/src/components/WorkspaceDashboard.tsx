@@ -74,6 +74,13 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
     loadAppConfig();
   }, []);
 
+  // Listen for open-settings event from TitleBar
+  useEffect(() => {
+    const handleOpenSettings = () => setSettingsOpen(true);
+    window.addEventListener('open-settings', handleOpenSettings);
+    return () => window.removeEventListener('open-settings', handleOpenSettings);
+  }, []);
+
   // Scan workspace when active workspace changes
   useEffect(() => {
     if (!activeWorkspace) {
@@ -227,26 +234,6 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
           )}
         </div>
 
-        {/* Settings button at the bottom */}
-        <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-tertiary)' }}>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="btn btn-secondary"
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              padding: '8px',
-              fontSize: '0.85rem',
-              fontWeight: 500,
-            }}
-          >
-            <SettingsIcon size={16} />
-            <span>Settings</span>
-          </button>
-        </div>
       </div>
 
       {/* Main Grid Panel */}
