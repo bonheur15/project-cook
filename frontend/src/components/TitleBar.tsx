@@ -43,7 +43,7 @@ export const TitleBar: React.FC = () => {
         }}
       >
         <CodeIcon size={16} />
-        <span style={{ color: 'var(--text-primary)', letterSpacing: '0.02em' }}>PROJECT COOKER</span>
+        <span style={{ color: 'var(--text-primary)', letterSpacing: '0.02em' }}>FORGEHUB</span>
       </div>
 
       {/* Center spacer - acts as drag handle */}

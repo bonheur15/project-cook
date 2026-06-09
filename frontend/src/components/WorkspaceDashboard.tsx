@@ -5,9 +5,10 @@ import { CodeIcon, SearchIcon, GitBranchIcon, CloseIcon } from './Icons';
 
 interface WorkspaceDashboardProps {
   onOpenProject: (project: backend.Project) => void;
+  onConfigChange?: () => void;
 }
 
-export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenProject }) => {
+export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenProject, onConfigChange }) => {
   const [config, setConfig] = useState<backend.Config | null>(null);
   const [activeWorkspace, setActiveWorkspace] = useState<string>('');
   const [newWorkspaceInput, setNewWorkspaceInput] = useState<string>('');
@@ -75,6 +76,7 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
       setConfig(updatedConfig);
       setActiveWorkspace(path);
       setNewWorkspaceInput('');
+      if (onConfigChange) onConfigChange();
     } catch (err) {
       alert(`Error saving workspace: ${err}`);
     }
@@ -93,6 +95,7 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
       if (activeWorkspace === path) {
         setActiveWorkspace(updatedWorkspaces[0] || '');
       }
+      if (onConfigChange) onConfigChange();
     } catch (err) {
       alert(`Error removing workspace: ${err}`);
     }
@@ -143,8 +146,8 @@ export const WorkspaceDashboard: React.FC<WorkspaceDashboardProps> = ({ onOpenPr
         }}
       >
         <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-teal))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            <CodeIcon size={20} style={{ color: 'var(--accent-blue)' }} /> Project Cooker
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+            <CodeIcon size={20} style={{ color: 'var(--accent-blue)' }} /> ForgeHub
           </h2>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Developer workspace cockpit</p>
         </div>

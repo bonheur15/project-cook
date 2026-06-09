@@ -1,30 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --bg-primary: #0b0f17;
-  --bg-secondary: #131924;
-  --bg-tertiary: #1b2333;
-  --bg-glass: rgba(19, 25, 36, 0.7);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(56, 189, 248, 0.4);
+  --bg-primary: #121214;
+  --bg-secondary: #1a1a1e;
+  --bg-tertiary: #232328;
+  --bg-glass: rgba(26, 26, 30, 0.75);
+  --border-color: rgba(255, 255, 255, 0.07);
+  --border-focus: #81c784;
   
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
   
-  --accent-blue: #38bdf8;
-  --accent-teal: #2dd4bf;
-  --accent-green: #34d399;
-  --accent-amber: #fbbf24;
-  --accent-rose: #f87171;
-  --accent-purple: #c084fc;
+  --accent-blue: #81c784; /* Sage Green */
+  --accent-teal: #a7f3d0;
+  --accent-green: #66bb6a;
+  --accent-amber: #eab308;
+  --accent-rose: #f43f5e;
+  --accent-purple: #a78bfa;
   
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
   
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -90,13 +90,12 @@ html, body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-  color: white;
-  box-shadow: 0 0 12px rgba(2, 132, 199, 0.3);
+  background: var(--accent-green);
+  color: #121214;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  background: #81c784;
   transform: translateY(-1px);
 }
 
@@ -112,12 +111,12 @@ html, body {
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: var(--accent-rose);
   color: white;
 }
 
 .btn-danger:hover {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: #e11d48;
 }
 
 .btn-text {
